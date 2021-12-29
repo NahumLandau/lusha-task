@@ -1,0 +1,1 @@
+export const getImageId = (imageUrl) => new URL(imageUrl).pathname.substring(1)
