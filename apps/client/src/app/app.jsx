@@ -1,27 +1,21 @@
 import { useEffect, useState } from 'react';
 import ImageItem from './components/ImageItem';
+import { likeImage } from './api';
 import { getImageId } from './utils';
+import Likes from './components/Likes';
+import useGetImages from './hooks/getImages';
 
 export const App = () => {
-
-  const [images, setImages] = useState([]);
+  const images = useGetImages();
   const [displayImages, setDisplayImages] = useState([]);
   const imagesChunkSize = 15;
 
   useEffect(() => {
-    fetch('/api/images')
-      .then(response => response.json())
-      .then(data => {
-        setImages(data)
-        setDisplayImages(data.slice(0, imagesChunkSize))
-      })
-  }, [])
+    setDisplayImages(images.slice(0, imagesChunkSize))
+  }, [images])
 
   const handleLikeClicked = (imageId) => {
-    fetch(`/api/images/${imageId}`, {
-      method: 'PATCH',
-    })
-      .then(response => response.json())
+    likeImage(imageId)
       .then(() => {
         const newImages = displayImages.map(image => {
           if (getImageId(image.url) === imageId) {
@@ -49,8 +43,10 @@ export const App = () => {
       <ul className='images-container'>
         {displayImages.map(image => (
           <li key={getImageId(image.url)}>
-          <ImageItem {...image} onLike={handleLikeClicked} />
-        </li>
+            <ImageItem {...image}>
+              <Likes onLike={handleLikeClicked} imageId={getImageId(image.url)} isLiked={image.isLiked} likes={image.likes} />
+            </ImageItem>
+          </li>
         ))}
       </ul>
 
